@@ -1,9 +1,12 @@
 
-function buildHtml(article) {
+function buildHtml(data) {
+    const title = data.title || 'Search Results';
+    const content = data.content || data.content;
+    
     return `
     <html>
     <head>
-        <title>${article.title}</title>
+        <title>${title}</title>
         <style>
             .search-box {
                 padding: 20px;
@@ -40,6 +43,20 @@ function buildHtml(article) {
             }
             .result-item:hover {
                 background: #f0f0f0;
+            }
+            .article-list {
+                margin: 20px;
+            }
+            .article-item {
+                margin-bottom: 15px;
+            }
+            .article-item a {
+                color: #007bff;
+                text-decoration: none;
+                font-size: 1.2em;
+            }
+            .article-item a:hover {
+                text-decoration: underline;
             }
         </style>
         <script>
@@ -93,8 +110,14 @@ function buildHtml(article) {
             <input type="text" name="q" placeholder="Search articles...">
             <div id="searchResults"></div>
         </div>
-        <h1>${article.title}</h1>
-        <p>${article.content}</p>
+        ${data.content ? `
+            <h1>${title}</h1>
+            <div>${content}</div>
+        ` : `
+            <div class="article-list">
+                ${content}
+            </div>
+        `}
     </body>
     </html>
     `;
