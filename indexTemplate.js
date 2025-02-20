@@ -67,17 +67,17 @@ function buildIndexHtml() {
         }
 
         window.onload = function() {
-          const searchInput = document.querySelector('input[name="q"]');
+          const searchInput = document.querySelector('#sbox');
           const searchResults = document.getElementById('searchResults');
           
           const performSearch = debounce(async (query) => {
-            if (query.length < 2) {
+            if (query.length < 1) {
               searchResults.style.display = 'none';
               return;
             }
             
             try {
-              const response = await fetch(\`/articles?q=\${encodeURIComponent(query)}\`);
+              const response = await fetch(\`/articles?rawq=\${encodeURIComponent(query)}\`);
               const articles = await response.json();
               
               searchResults.innerHTML = articles
@@ -107,7 +107,8 @@ function buildIndexHtml() {
       <div class="container">
         <div class="logo">WebDict</div>
         <div class="search-box">
-          <input type="text" name="q" placeholder="Search articles...">
+          <form action="./articles" method="get">
+          <input type="text" name="q" placeholder="Search articles..." id="sbox">
           <div id="searchResults"></div>
         </div>
       </div>

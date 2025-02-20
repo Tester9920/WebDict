@@ -6,6 +6,8 @@ const read = require('node-readability');
 const buildHtml = require('./buildHtml');
 const buildIndexHtml = require('./indexTemplate');
 
+app.use(express.static('files'));
+
 app.set('port', process.env.PORT || 3000);
 
 app.use(bodyParser.json());
@@ -17,23 +19,21 @@ app.get('/', (req, res) => {
 
 app.get('/articles', (req, res, next) => {
   const searchQuery = req.query.q;
+  const searchQueryRaw = req.query.rawq;
   if (searchQuery) {
     Article.search(searchQuery, (err, articles) => {
       if (err) return next(err);
-      if (req.headers.accept?.includes('application/json')) {
-        res.json(articles);
-      } else {
-        res.send(buildHtml(articles));
-      }
+      res.send(buildHtml.manyArticles(articles));
+    });
+  } else if (searchQueryRaw) {
+    Article.search(searchQueryRaw, (err, articles) => {
+      if (err) return next(err);
+      res.send(articles);
     });
   } else {
     Article.all((err, articles) => {
       if (err) return next(err);
-      if (req.headers.accept?.includes('application/json')) {
-        res.json(articles);
-      } else {
-        res.send(buildHtml(articles));
-      }
+      res.send(articles);
     });
   }
 });
@@ -42,7 +42,7 @@ app.get('/articles/:id', (req, res, next) => {
   const id = req.params.id;
   Article.find(id, (err, article) => {
     if (err) return next(err);
-    res.send(buildHtml(article));
+    res.send(buildHtml.oneArticle(article));
   });
 });
 
