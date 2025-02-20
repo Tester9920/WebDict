@@ -20,12 +20,20 @@ app.get('/articles', (req, res, next) => {
   if (searchQuery) {
     Article.search(searchQuery, (err, articles) => {
       if (err) return next(err);
-      res.send(articles);
+      if (req.headers.accept?.includes('application/json')) {
+        res.json(articles);
+      } else {
+        res.send(buildHtml(articles));
+      }
     });
   } else {
     Article.all((err, articles) => {
       if (err) return next(err);
-      res.send(articles);
+      if (req.headers.accept?.includes('application/json')) {
+        res.json(articles);
+      } else {
+        res.send(buildHtml(articles));
+      }
     });
   }
 });
