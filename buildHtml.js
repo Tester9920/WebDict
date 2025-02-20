@@ -1,27 +1,10 @@
 
-function buildHtml(data) {
-    const isSearchResults = Array.isArray(data);
-    const title = isSearchResults ? 'Search Results' : data.title;
-    const content = isSearchResults 
-        ? data.map(article => `
-            <div class="article">
-                <h2><a href="/articles/${article.id}">${article.title}</a></h2>
-                <p>${article.content.substring(0, 200)}...</p>
-            </div>
-        `).join('')
-        : `<div class="article"><p>${data.content}</p></div>`;
-
+function buildHtml(article) {
     return `
     <html>
     <head>
-        <title>${title}</title>
+        <title>${article.title}</title>
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-            }
             .search-box {
                 padding: 20px;
                 background: #f5f5f5;
@@ -57,24 +40,6 @@ function buildHtml(data) {
             }
             .result-item:hover {
                 background: #f0f0f0;
-            }
-            .article {
-                margin-bottom: 30px;
-                padding: 20px;
-                background: #fff;
-                border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            }
-            .article h2 {
-                margin-top: 0;
-                color: #333;
-            }
-            .article a {
-                color: #007bff;
-                text-decoration: none;
-            }
-            .article a:hover {
-                text-decoration: underline;
             }
         </style>
         <script>
@@ -128,8 +93,8 @@ function buildHtml(data) {
             <input type="text" name="q" placeholder="Search articles...">
             <div id="searchResults"></div>
         </div>
-        <h1>${title}</h1>
-        ${content}
+        <h1>${article.title}</h1>
+        <p>${article.content}</p>
     </body>
     </html>
     `;
