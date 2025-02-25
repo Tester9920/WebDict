@@ -8,6 +8,7 @@ const buildIndexHtml = require('./indexTemplate');
 const logger = require('./logger');
 const { error } = require('console');
 
+app.use(logger.AccessLogger.connectLogger(logger.AccessLogger, { level: 'info' }));
 app.use(express.static('files'));
 
 app.set('port', process.env.PORT || 3000);
@@ -59,7 +60,5 @@ app.get('/articles/:id', (req, res, next) => {
 app.listen(app.get('port'), () => {
   console.log('App started on port', app.get('port'));
 });
-
-app.use(logger.AccessLogger);
 
 module.exports = app;
