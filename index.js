@@ -5,6 +5,8 @@ const Article = require('./db').Article;
 const read = require('node-readability');
 const buildHtml = require('./buildHtml');
 const buildIndexHtml = require('./indexTemplate');
+const logger = require('./logger');
+const { error } = require('console');
 
 app.use(express.static('files'));
 
@@ -18,59 +20,46 @@ app.get('/', (req, res) => {
 });
 
 app.get('/articles', (req, res, next) => {
+  try {
   const searchQuery = req.query.q;
   const searchQueryRaw = req.query.rawq;
   if (searchQuery) {
     Article.search(searchQuery, (err, articles) => {
-      if (err) return next(err);
       res.send(buildHtml.manyArticles(articles));
     });
   } else if (searchQueryRaw) {
     Article.search(searchQueryRaw, (err, articles) => {
-      if (err) return next(err);
       res.send(articles);
     });
   } else {
     Article.all((err, articles) => {
-      if (err) return next(err);
       res.send(articles);
     });
-  }
-});
+  }} catch (error) {
+    console.error('Error fetching articles:', error);
+    res.status(500).send('An error occurred while fetching articles. Please try again later.');
+}});
 
 app.get('/articles/:id', (req, res, next) => {
   const id = req.params.id;
   Article.find(id, (err, article) => {
-    if (err) return next(err);
-    res.send(buildHtml.oneArticle(article));
+    try {
+      if (!article) {
+        console.log(article);
+        return res.status(404).send('Article not found');
+      }
+      res.send(buildHtml.oneArticle(article));
+    } catch (error) {
+      console.error('Error fetching article:', error);
+      res.status(500).send('An error occurred while fetching the article. Please try again later.');
+    }
   });
-});
-
-app.delete('/articles/:id', (req, res, next) => {
-  const id = req.params.id;
-  Article.delete(id, (err) => {
-    if (err) return next(err);
-    res.send({ message: 'Deleted' });
   });
-});
-
-app.post('/articles', (req, res, next) => {
-  const url = req.body.url;
-
-  read(url, (err, result) => {
-      if (err || !result) res.status(500).send('Error downloading article');
-        Article.create(
-          { title: result.title, content: result.content },
-          (err, article) => {
-            if (err) return next(err);
-            res.send('OK');
-          }
-        );
-  });
-});
 
 app.listen(app.get('port'), () => {
   console.log('App started on port', app.get('port'));
 });
+
+app.use(logger.AccessLogger);
 
 module.exports = app;
