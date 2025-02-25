@@ -3,14 +3,10 @@ const config = require('./config/log4js.json');
 
 log4js.configure(config);
 
-const DefaultLogger = log4js.getLogger();
-const AppLogger = log4js.getLogger('application');
-const AccessLogger = log4js.getLogger('access');
-const ErrorLogger = log4js.getLogger('error');
+const DefaultLogger = log4js.getLogger('default');
+const AccessLogger = log4js.getLogger('http');
 
 module.exports = {
     DefaultLogger,
-    AppLogger,
-    AccessLogger,
-    ErrorLogger
+    AccessLogger
 };

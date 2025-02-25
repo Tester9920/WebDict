@@ -7,8 +7,9 @@ const buildHtml = require('./buildHtml');
 const buildIndexHtml = require('./indexTemplate');
 const logger = require('./logger');
 const { error } = require('console');
+const log4js = require('log4js');
 
-app.use(logger.AccessLogger.connectLogger(logger.AccessLogger, { level: 'info' }));
+app.use(log4js.connectLogger(logger.AccessLogger, { level: 'info' }));
 app.use(express.static('files'));
 
 app.set('port', process.env.PORT || 3000);
