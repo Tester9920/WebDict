@@ -4,6 +4,7 @@ function buildIndexHtml() {
     <html>
     <head>
       <title>WebDict</title>
+      <link rel="stylesheet" href="/seachbox.css">
       <style>
         body {
           margin: 0;
@@ -25,6 +26,9 @@ function buildIndexHtml() {
         }
         .search-box {
           position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         input[type="text"] {
           width: 500px;
@@ -33,6 +37,48 @@ function buildIndexHtml() {
           border: 1px solid #ddd;
           border-radius: 24px;
           outline: none;
+        }
+        .lang-selector {
+          position: absolute;
+          left: -45px;
+          top: 5%;
+          /*transform: translateY(-50%);*/
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #ccc;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          cursor: pointer;
+          background-color: white;
+          color: #333;
+          font-size: 14px;
+          /*z-index: 1;*/
+          /*transition: all 0.3s ease;*/
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          background-position: center;
+          background-size: cover;
+        }
+        .lang-selector:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lang-selector.en {
+          /*background-color: #007bff;*/
+          color: white;
+          /*border-color: #007bff;*/
+          background-position: center;
+          background-size: cover;
+          background-image: url('gb.png');
+        }
+        .lang-selector.zh {
+          /*background-color: #28a745;*/
+          color: white;
+          /*border-color: #28a745;*/
+          background-position: center;
+          background-size: cover;
+          background-image: url('cn.png');
         }
         #searchResults {
           position: absolute;
@@ -69,6 +115,38 @@ function buildIndexHtml() {
         window.onload = function() {
           const searchInput = document.querySelector('#sbox');
           const searchResults = document.getElementById('searchResults');
+          const langSelector = document.getElementById('langSelector');
+          const langParam = document.getElementById('langParam');
+          
+          // Set default language (zh)
+          let currentLang = localStorage.getItem('preferred_lang') || 'zh';
+          updateLangSelector(currentLang);
+          
+          // Language selector click handler
+          if (langSelector) {
+              langSelector.addEventListener('click', function() {
+                  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                  updateLangSelector(currentLang);
+                  localStorage.setItem('preferred_lang', currentLang);
+                  langParam.value = currentLang;
+                  // Clear search results when switching language
+                  searchResults.style.display = 'none';
+                  if (searchInput.value.length > 0) {
+                      performSearch(searchInput.value);
+                  }
+              });
+          }
+          
+          function updateLangSelector(lang) {
+              //langSelector.textContent = lang === 'zh' ? '🇨🇳' : '🇺🇸';
+              langSelector.className = 'lang-selector';
+              if (lang === 'en') {
+                  langSelector.classList.add('en');
+              } else {
+                  langSelector.classList.add('zh');
+              }
+              langParam.value = lang;
+          }
           
           const performSearch = debounce(async (query) => {
             if (query.length < 1) {
@@ -77,7 +155,7 @@ function buildIndexHtml() {
             }
             
             try {
-              const response = await fetch(\`/articles?rawq=\${encodeURIComponent(query)}\`);
+              const response = await fetch(\`/articles?rawq=\${encodeURIComponent(query)}&l=\${currentLang}\`);
               const articles = await response.json();
               
               searchResults.innerHTML = articles
@@ -108,8 +186,11 @@ function buildIndexHtml() {
         <div class="logo">WebDict</div>
         <div class="search-box">
           <form action="./articles" method="get">
-          <input type="text" name="q" placeholder="Search articles..." id="sbox">
-          <div id="searchResults"></div>
+            <div id="langSelector" class="lang-selector"></div>
+            <input type="text" name="q" placeholder="Search articles..." id="sbox">
+            <input type="hidden" name="l" id="langParam" value="zh">
+            <div id="searchResults"></div>
+          </form>
         </div>
       </div>
     </body>
